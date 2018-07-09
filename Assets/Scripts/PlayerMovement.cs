@@ -9,52 +9,57 @@ public class PlayerMovement : MonoBehaviour {
     public float currentSpeed = 0;
     public float speedH = 2.0f;
     public float speedV = 2.0f;
+    public float audioPitchChangeRate;
 
     private float yaw = 0.0f;
     private float pitch = 0.0f;
 
     private Rigidbody rb;
+    private AudioSource audio;
+    private float currentAudioPitch;
+    private float minAudioPitch;
+    private float maxAudioPitch;
+    private Vector3 forward;
+    
 
 	void Start () {
         rb = GetComponent<Rigidbody>();
+        audio = GetComponent<AudioSource>();
+        minAudioPitch = 0.2f;
+        maxAudioPitch = 0.9f;
+        
 	}
 	
 
 	void FixedUpdate () {
-        if (Input.GetButton("Right") )
-        {
-            rb.AddForce(transform.right * movementStrength * 2);
-        }
-        if (Input.GetButton("Left"))
-        {
-            rb.AddForce(-transform.right * movementStrength * 2);
-        }
-
-            //transform.Rotate(transform.right * movementStrength * Time.deltaTime * 2);
-
-            yaw += speedH * Input.GetAxis("Mouse X");
-            pitch -= speedV * Input.GetAxis("Mouse Y");
+        yaw += speedH * Input.GetAxis("Mouse X");
+        pitch -= speedV * Input.GetAxis("Mouse Y");
 
         transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
+        forward = transform.forward;
         
-        /*if (Input.GetButton("Backward"))
-        {
-            transform.Rotate(-transform.right * movementStrength * Time.deltaTime * 2);
-        }*/
+
         if (Input.GetButton("Jump"))
         {
-            rb.velocity += transform.forward * movementStrength * Time.deltaTime;
+            rb.velocity += forward * movementStrength * Time.deltaTime;
 
-            
-        }
-       /* else
-        {
-            rb.velocity -= transform.forward * Time.deltaTime * 10;
-            if(currentSpeed < 5)
+            audio.pitch += Time.deltaTime * audioPitchChangeRate * 3;
+            if (audio.pitch > maxAudioPitch)
             {
-                rb.velocity = transform.forward * currentSpeed;
+                audio.pitch = maxAudioPitch;
             }
-        }*/
+        }
+        else
+        {
+            audio.pitch -= Time.deltaTime * audioPitchChangeRate;
+            
+            if(audio.pitch < minAudioPitch)
+            {
+                audio.pitch = minAudioPitch;
+            }
+        }
+        rb.velocity = forward.normalized * rb.velocity.magnitude;
+        
         currentSpeed = rb.velocity.magnitude;
 
         Debug.DrawRay(transform.position, transform.forward, Color.red);
@@ -62,9 +67,5 @@ public class PlayerMovement : MonoBehaviour {
         {
             rb.velocity = rb.velocity.normalized * maxSpeed;
         }
-        /*if (currentSpeed < 10)
-        {
-            rb.velocity = transform.forward * 10;
-        }*/
     }
 }
