@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Goal : MonoBehaviour {
 
+    //Detect player
     void OnTriggerEnter(Collider other)
     {
         if(other.gameObject.tag == "Player")
